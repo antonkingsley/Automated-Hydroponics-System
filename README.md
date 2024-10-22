@@ -112,8 +112,8 @@ Install the necessary libraries in the Arduino IDE by going to Sketch > Include 
 
 To get the code, clone this GitHub repository:
 
-## bash
-	git clone https://github.com/yourusername/automated-hydroponics-esp32.git
+## bash	
+ 	https://github.com/antonkingsley/Automated-Hydroponics-System.git
 	cd automated-hydroponics-esp32
 
 ###  Step 4: Upload the Code
