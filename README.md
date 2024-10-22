@@ -1,6 +1,6 @@
 # Automated Hydroponics System
  Automated Hydroponics System
- # Automated-Hydroponics-System-Using-ESP32-WROOM-32
+ ## Automated-Hydroponics-System-Using-ESP32-WROOM-32
 The system monitors and controls essential environmental factors such as water levels, nutrient delivery, pH balance, temperature, and light intensity in a hydroponic setup
 ### Project Overview
 
