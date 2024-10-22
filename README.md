@@ -114,7 +114,8 @@ To get the code, clone this GitHub repository:
 
 ## bash	
  	https://github.com/antonkingsley/Automated-Hydroponics-System.git
-	cd automated-hydroponics-esp32
+	
+ cd automated-hydroponics-esp32
 
 ###  Step 4: Upload the Code
 
