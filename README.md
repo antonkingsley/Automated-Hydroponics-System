@@ -44,7 +44,7 @@ To automate a hydroponics system using the ESP32-WROOM-32, the following hardwar
 
 The connections of the components are crucial to ensure proper functionality of the system.
 ## Schematic:
-![Schematic diagram](https://github.com/antonkingsley/Automated-Hydroponics-System/blob/main/screen_shots/Full%20Schematic%20diagram.png?raw=true)
+![Schematic diagram](https://github.com/antonkingsley/Automated-Hydroponics-System/blob/main/screen_shots/Schematic%20diagram.png?raw=true)
 
 - Water Level Sensor: Connected to GPIO32 (as input pin)
 - Nutrient Pumps: Controlled via relay module, connected to GPIO pins like GPIO25, GPIO26.
@@ -130,18 +130,7 @@ Ensure the pH sensor and nutrient pumps are calibrated:
 ## Diagrams
 ### Full System Diagram
 
-plaintext
-
-+----------------------+          +-----------------------+
-|      ESP32            |          |       Sensors         |
-|      Controller       |          |       (pH, Temp, etc) |
-+---------+-------------+          +-----------+-----------+
-          |                                    |
-          |                                    |
-+---------v------------------------------------v---------+
-|               Actuators (Pumps, Valves, Lights)        |
-|                                                       |
-+-------------------------------------------------------+
+![Schematic diagram](https://github.com/antonkingsley/Automated-Hydroponics-System/blob/main/screen_shots/Full%20Schematic%20diagram.png?raw=true)
 
 ### Component Connections Diagram
 
