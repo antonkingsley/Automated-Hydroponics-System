@@ -157,6 +157,6 @@ Contributions to this project are welcome! Please follow the standard GitHub wor
 
 ### License
 
-This project is licensed under the MIT License. See the  in MIT LICENSE
+This project is licensed under the MIT License.
 
 
