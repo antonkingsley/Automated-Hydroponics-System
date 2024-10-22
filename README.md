@@ -157,7 +157,7 @@ Contributions to this project are welcome! Please follow the standard GitHub wor
 
 ### License
 
-This project is licensed under the MIT License. See the  in [`LICENSE`](#licence)<a id='https://github.com/antonkingsley/Automated-Hydroponics-System/tree/main?tab=MIT-1-ov-file#readme'></a>
+This project is licensed under the MIT License. See the  in [`MIT LICENSE`](#licence)<a id='https://github.com/antonkingsley/Automated-Hydroponics-System/tree/main?tab=MIT-1-ov-file#readme'></a>
 
 ## Feature file for more details.
 
