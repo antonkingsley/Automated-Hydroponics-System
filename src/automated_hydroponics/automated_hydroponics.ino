@@ -9,7 +9,6 @@
 const char* ssid = "YourSSID";
 const char* password = "YourPassword";
 
-
 // Set static IP for ESP32
 IPAddress local_IP(192, 168, 1, 184);
 IPAddress gateway(192, 168, 1, 1);
@@ -25,9 +24,11 @@ IPAddress subnet(255, 255, 255, 0);
 #define ULTRASONIC_TRIGGER_PIN 5
 #define ULTRASONIC_ECHO_PIN 18
 #define LIGHT_SENSOR_PIN 35
+#define LIGHT_ON_PIN 17
+
 
 // DHT sensor type
-DHT dht(DHT_PIN, DHT22);
+DHT dht(DHT_PIN, DHT11);
 
 // LCD setup
 LiquidCrystal_I2C lcd(0x27, 20, 4);
@@ -47,10 +48,12 @@ void handleRoot();
 void handleManualControl();
 void handlePumpToggle();
 void handleSolenoidToggle();
+void handleLightToggle();
 void handleMistToggle();
 void displayLCD();
 void irrigationControl();
 void monitorSensors();
+void handleFertilizerPumpToggle();
 
 // HTML web interface
 String manualControlPage();
@@ -70,6 +73,7 @@ void setup() {
   pinMode(SOLENOID_PIN, OUTPUT);
   pinMode(MIST_GENERATOR_PIN, OUTPUT);
   pinMode(FERTILIZER_PUMP_PIN, OUTPUT);
+  pinMode(LIGHT_ON_PIN,OUTPUT);
   
   // Setup Wi-Fi
   setupWiFi();
@@ -80,6 +84,10 @@ void setup() {
   server.on("/toggle-pump", handlePumpToggle);
   server.on("/toggle-solenoid", handleSolenoidToggle);
   server.on("/toggle-mist", handleMistToggle);
+  server.on("/toggle-light", handleLightToggle);
+  server.on("/toggle-fertili", handleFertilizerPumpToggle);
+
+
 
   // Start web server
   server.begin();
@@ -88,6 +96,9 @@ void setup() {
   digitalWrite(PUMP_PIN, LOW);
   digitalWrite(SOLENOID_PIN, LOW);
   digitalWrite(MIST_GENERATOR_PIN, LOW);
+  digitalWrite(LIGHT_ON_PIN, LOW);
+  digitalWrite(FERTILIZER_PUMP_PIN, LOW);  
+
 }
 
 void loop() {
@@ -100,6 +111,7 @@ void loop() {
 
   // Update the LCD display
   displayLCD();
+  delay(5000);
 }
 
 // Connect to Wi-Fi with static IP
@@ -146,6 +158,7 @@ void handleRoot() {
   server.send(200, "text/html", html);
 }
 
+
 // Manual control page with buttons
 void handleManualControl() {
   String html = manualControlPage();
@@ -153,41 +166,61 @@ void handleManualControl() {
 }
 
 String manualControlPage() {
-  String html = R"rawliteral(
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Manual Control</title>
-      <style>
-        body { font-family: Arial; text-align: center; }
-        .button { padding: 15px 25px; font-size: 24px; margin: 5px; }
-        .on { background-color: #4CAF50; color: white; }
-        .off { background-color: #f44336; color: white; }
-      </style>
-    </head>
-    <body>
-      <h1>Manual Control</h1>
-      <p><a href="/toggle-pump"><button class="button )rawliteral";
+  String html = "<!DOCTYPE html>\n";
+  html += "<html lang=\"en\">\n";
+  html += "<head>\n";
+  html += "  <meta charset=\"UTF-8\">\n";
+  html += "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
+  html += "  <title>Manual Control</title>\n";
+  html += "  <style>\n";
+  html += "    body { font-family: Arial; text-align: center; }\n";
+  html += "    .button { padding: 15px 25px; font-size: 24px; margin: 5px; }\n";
+  html += "    .on { background-color: #4CAF50; color: white; }\n";
+  html += "    .off { background-color: #f44336; color: white; }\n";
+  html += "  </style>\n";
+  html += "</head>\n";
+  html += "<body>\n";
+  html += "  <h1>Manual Control</h1>\n";
+
+  // Pump control button
+  html += "  <p><a href=\"/toggle-pump\"><button class=\"button ";
   html += (digitalRead(PUMP_PIN) ? "on" : "off");
-  html += R"rawliteral(">)rawliteral";
+  html += "\">";
   html += (digitalRead(PUMP_PIN) ? "Turn Pump OFF" : "Turn Pump ON");
-  html += R"rawliteral(</button></a></p>
-      <p><a href="/toggle-solenoid"><button class="button )rawliteral";
+  html += "</button></a></p>\n";
+
+  // Solenoid control button
+  html += "  <p><a href=\"/toggle-solenoid\"><button class=\"button ";
   html += (digitalRead(SOLENOID_PIN) ? "on" : "off");
-  html += R"rawliteral(">)rawliteral";
+  html += "\">";
   html += (digitalRead(SOLENOID_PIN) ? "Turn Solenoid OFF" : "Turn Solenoid ON");
-  html += R"rawliteral(</button></a></p>
-      <p><a href="/toggle-mist"><button class="button )rawliteral";
+  html += "</button></a></p>\n";
+
+  // Mist generator control button
+  html += "  <p><a href=\"/toggle-mist\"><button class=\"button ";
   html += (digitalRead(MIST_GENERATOR_PIN) ? "on" : "off");
-  html += R"rawliteral(">)rawliteral";
+  html += "\">";
   html += (digitalRead(MIST_GENERATOR_PIN) ? "Turn Mist OFF" : "Turn Mist ON");
-  html += R"rawliteral(</button></a></p>
-      <p><a href="/"><button>Go Back</button></a></p>
-    </body>
-    </html>
-  )rawliteral";
+  html += "</button></a></p>\n";
+
+  // Fertilizer pump control button
+  html += "  <p><a href=\"/toggle-fertili\"><button class=\"button ";
+  html += (digitalRead(FERTILIZER_PUMP_PIN) ? "on" : "off");
+  html += "\">";
+  html += (digitalRead(FERTILIZER_PUMP_PIN) ? "Turn Fertilizer OFF" : "Turn Fertilizer ON");
+  html += "</button></a></p>\n";
+
+  // Light control button
+  html += "  <p><a href=\"/toggle-light\"><button class=\"button ";
+  html += (digitalRead(LIGHT_ON_PIN) ? "on" : "off");
+  html += "\">";
+  html += (digitalRead(LIGHT_ON_PIN) ? "Turn Light OFF" : "Turn Light ON");
+  html += "</button></a></p>\n";
+
+  html += "  <p><a href=\"/\"><button>Go Back</button></a></p>\n";
+  html += "</body>\n";
+  html += "</html>\n";
+  
   return html;
 }
 
@@ -207,6 +240,17 @@ void handleMistToggle() {
   handleManualControl();
 }
 
+void handleFertilizerPumpToggle() {
+  digitalWrite(FERTILIZER_PUMP_PIN, !digitalRead(FERTILIZER_PUMP_PIN));
+  handleManualControl();
+}
+
+  
+void handleLightToggle() {
+  digitalWrite(LIGHT_ON_PIN, !digitalRead(LIGHT_ON_PIN));
+  handleManualControl();
+}
+
 // Monitoring sensors and controlling irrigation
 void monitorSensors() {
   humidity = dht.readHumidity();
@@ -222,31 +266,36 @@ void irrigationControl() {
 	// Automatically control components based on sensor data
   if (temperature > 30) {
     handlePumpToggle();    
-  } else {
+  } 
+  if(temperature < 20) {
     handlePumpToggle();    
   }
 
   if (humidity > 30) {    
     handleMistToggle();
-  } else {
+  } 
+  if (humidity < 20) {
     handleMistToggle();
   }
 
   if (pH < 6.5) {
     handleFertilizerPumpToggle();
-  } else {
+  } 
+  if (pH > 7.5) {
     handleFertilizerPumpToggle();
   }
 
   if (waterLevel < 10) {
     handleSolenoidToggle();
-  } else {
+  } 
+  if (waterLevel > 60){
     handleSolenoidToggle();
   }
 
   if (lightIntensity < 10) {
     handleLightToggle();
-  } else {
+  } 
+  if (lightIntensity > 15){
     handleLightToggle();
   }
 
