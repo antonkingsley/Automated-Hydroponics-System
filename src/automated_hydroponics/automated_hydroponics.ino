@@ -6,8 +6,9 @@
 #include <Wire.h>
 
 // Wi-Fi credentials
-const char* ssid = "YourSSID";
-const char* password = "YourPassword";
+const char* ssid = "username";
+const char* password = "password";
+
 
 // Set static IP for ESP32
 IPAddress local_IP(192, 168, 1, 184);
@@ -25,6 +26,21 @@ IPAddress subnet(255, 255, 255, 0);
 #define ULTRASONIC_ECHO_PIN 18
 #define LIGHT_SENSOR_PIN 35
 #define LIGHT_ON_PIN 17
+
+//Upper Threshold valus
+const int TEMP_THRESHOLD = 30;
+const int HUMIDITY_THRESHOLD = 40;
+const int PH_THRESHOLD = 6.5;
+const int WATER_LEVEL_THRESHOLD = 10;
+const int LIGHT_THRESHOLD = 10;
+
+
+//Lower Threshold valus
+const int TEMP_THRESHOLD_LOWER = 20;
+const int HUMIDITY_THRESHOLD_LOWER = 30;
+const int PH_THRESHOLD_LOWER = 7.5;
+const int WATER_LEVEL_THRESHOLD_LOWER = 60;
+const int LIGHT_THRESHOLD_LOWER = 15;
 
 
 // DHT sensor type
@@ -74,6 +90,10 @@ void setup() {
   pinMode(MIST_GENERATOR_PIN, OUTPUT);
   pinMode(FERTILIZER_PUMP_PIN, OUTPUT);
   pinMode(LIGHT_ON_PIN,OUTPUT);
+
+  //// Initialize input pins
+  pinMode(PH_SENSOR_PIN, INPUT);
+  pinMode(LIGHT_SENSOR_PIN, INPUT);
   
   // Setup Wi-Fi
   setupWiFi();
@@ -87,8 +107,6 @@ void setup() {
   server.on("/toggle-light", handleLightToggle);
   server.on("/toggle-fertili", handleFertilizerPumpToggle);
 
-
-
   // Start web server
   server.begin();
 
@@ -98,7 +116,6 @@ void setup() {
   digitalWrite(MIST_GENERATOR_PIN, LOW);
   digitalWrite(LIGHT_ON_PIN, LOW);
   digitalWrite(FERTILIZER_PUMP_PIN, LOW);  
-
 }
 
 void loop() {
@@ -224,6 +241,7 @@ String manualControlPage() {
   return html;
 }
 
+
 // Toggle functions for the devices
 void handlePumpToggle() {
   digitalWrite(PUMP_PIN, !digitalRead(PUMP_PIN));
@@ -263,42 +281,43 @@ void monitorSensors() {
 // Irrigation control logic
 void irrigationControl() {
   // Add your logic for automated irrigation, pump control, etc.
-	// Automatically control components based on sensor data
-  if (temperature > 30) {
+  // Automatically control components based on sensor data
+  if (temperature > TEMP_THRESHOLD) {
     handlePumpToggle();    
   } 
-  if(temperature < 20) {
+  if(temperature < TEMP_THRESHOLD_LOWER) {
     handlePumpToggle();    
   }
 
-  if (humidity > 30) {    
+  if (humidity > HUMIDITY_THRESHOLD) {    
     handleMistToggle();
   } 
-  if (humidity < 20) {
+  if (humidity < HUMIDITY_THRESHOLD_LOWER) {
     handleMistToggle();
   }
 
-  if (pH < 6.5) {
+  if (pH < PH_THRESHOLD) {
     handleFertilizerPumpToggle();
   } 
-  if (pH > 7.5) {
+  if (pH > PH_THRESHOLD_LOWER) {
     handleFertilizerPumpToggle();
   }
 
-  if (waterLevel < 10) {
+  if (waterLevel < WATER_LEVEL_THRESHOLD) {
     handleSolenoidToggle();
   } 
-  if (waterLevel > 60){
+  if (waterLevel > WATER_LEVEL_THRESHOLD_LOWER){
     handleSolenoidToggle();
   }
 
-  if (lightIntensity < 10) {
+  if (lightIntensity < LIGHT_THRESHOLD) {
     handleLightToggle();
   } 
-  if (lightIntensity > 15){
+  if (lightIntensity > LIGHT_THRESHOLD_LOWER){
     handleLightToggle();
   }
-
+ 
+  
 }
 
 // Display data on the LCD
